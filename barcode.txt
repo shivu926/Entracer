@@ -1,0 +1,61 @@
+// QR
+// Restore Factory Settings 
+// UART Output     
+// Continuous Mode 
+// Non-Scanning Interval 
+// Lighting - No light 
+
+#include <Arduino.h>                              
+#include <wiring_private.h>
+
+
+
+// data coming from the serial port
+String inputString = "";        
+// the line has arrived
+boolean stringComplete = false;  
+int countstr=0;
+// to search for an ending
+unsigned long millisendstr=0;
+
+
+
+void setup() {
+  // 
+  Serial.begin(9600);
+  Serial1.begin(9600);               // Begin Serial1
+
+  // резервирование 50 bytes для inputString:
+  inputString.reserve(50);
+}
+
+void loop() {
+  // 
+  serialScanerEvent();
+  //
+  if (stringComplete) {
+    Serial.println(inputString);
+    // очистить строку
+    inputString = "";
+    stringComplete = false;
+    countstr=0;
+   }
+  
+}
+
+void serialScanerEvent() {
+  //
+  if (Serial1.available()>0) {
+    // get the new byte:
+    char inChar = (char)Serial1.read();
+    // add it to the inputString:
+    inputString += inChar;
+    countstr++;
+    millisendstr=millis();
+  }
+  else {
+    if(millis()-millisendstr>1000 && countstr>0) {
+       stringComplete=true;
+    }
+  }
+}
